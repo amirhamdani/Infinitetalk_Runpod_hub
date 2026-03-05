@@ -3,9 +3,31 @@
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
+# Detect GPU compute capability and decide whether sage attention is safe
+echo "Detecting GPU compute capability..."
+GPU_CC=$(python -c "import torch; cc=torch.cuda.get_device_capability(); print(f'{cc[0]}{cc[1]}')" 2>/dev/null || echo "0")
+echo "GPU Compute Capability code: $GPU_CC"
+
+SAGE_FLAG=""
+if [ "$GPU_CC" -ge "100" ]; then
+    echo "Blackwell+ GPU detected (CC >= 10.0) — enabling SageAttention"
+    SAGE_FLAG="--use-sage-attention"
+else
+    echo "Non-Blackwell GPU detected (CC $GPU_CC) — SageAttention disabled to avoid FP8 kernel crash"
+fi
+
+# Allow explicit override via environment variable
+if [ "${FORCE_SAGE_ATTENTION}" = "1" ]; then
+    SAGE_FLAG="--use-sage-attention"
+    echo "FORCE_SAGE_ATTENTION=1 — SageAttention force-enabled"
+elif [ "${FORCE_SAGE_ATTENTION}" = "0" ]; then
+    SAGE_FLAG=""
+    echo "FORCE_SAGE_ATTENTION=0 — SageAttention force-disabled"
+fi
+
 # Start ComfyUI in the background
 echo "Starting ComfyUI in the background..."
-python /ComfyUI/main.py --listen --use-sage-attention &
+python /ComfyUI/main.py --listen $SAGE_FLAG &
 
 # Wait for ComfyUI to be ready
 echo "Waiting for ComfyUI to be ready..."
