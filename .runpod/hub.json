@@ -12,9 +12,7 @@
       "gpuCount": 1,
       "gpuIds": "ADA_24,ADA_32_PRO",
       "allowedCudaVersions": [
-        "12.4",
-        "12.6",
-        "12.8"
+        "12.4"
       ]
     }
 }

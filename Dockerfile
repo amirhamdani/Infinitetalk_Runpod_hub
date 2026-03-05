@@ -1,5 +1,6 @@
-# Ada Lovelace + Blackwell compatible base (CUDA 12.8, not Blackwell-only)
-FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu22.04 AS runtime
+# CUDA 12.4 base — compatible with NVIDIA driver >= 550.x
+# (12.8 requires driver >= 570.x which some RunPod Ada machines lack)
+FROM nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04 AS runtime
 
 RUN rm -f /etc/apt/sources.list.d/*.list
 
@@ -36,7 +37,7 @@ RUN ln -s /usr/bin/python3.10 /usr/bin/python && \
 
 RUN pip install -U wheel setuptools packaging
 
-# PyTorch with CUDA 12.4 support — works on both Ada Lovelace and Blackwell
+# PyTorch with CUDA 12.4 — works on Ada Lovelace (RTX 4090) and newer
 RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 
 RUN pip install -U "huggingface_hub[hf_transfer]"
